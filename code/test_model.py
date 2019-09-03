@@ -23,7 +23,8 @@ if __name__ == '__main__':
     beta = 0.01
     beta_vocals = 0.03
     batch_size = 1
-    num_epochs = 50
+   num_epochs = 50
+    # num_epoches = 2
 
     destination_path= '../AudioResults/'
     phase_path = '../Val/Phases/'
@@ -45,11 +46,12 @@ if __name__ == '__main__':
 
 
     net = SepConvNet(t1,f1,t2,f2,N1,N2,inp_size,NN)
-    # net.load_state_dict(torch.load('Weights/Weights_200_3722932.6015625.pth')) #least score Weights so far
-    net.load_state_dict(torch.load('Weights/Weights_norm_orig2.pth'))
+    net.load_state_dict(torch.load('Weights/Weights_5_95724.06152068662.pth')) #least score Weights so far
+    #net.load_state_dict(torch.load('Weights/Weights_norm_orig2.pth'))
     net.eval()
     test_set = SourceSepTest(transforms = None)
     test_loader = DataLoader(test_set, batch_size=batch_size,shuffle=False)
+    #import pdb;pdb.set_trace()
     for i,(test_inp,test_phase_file,file_str) in tqdm(enumerate(test_loader)):
         print('Testing, i='+str(i))
         test_phase = np.load(phase_path+test_phase_file[0])
