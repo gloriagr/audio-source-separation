@@ -6,7 +6,7 @@ import torch
 import os
 import re
 
-path= "../dsd100/subset/"
+path= "C:\\Users\\daisp\\datasets\\DSD100\\"
 path_mixtures = path + "Mixtures/Dev/"
 path_sources = path + "Sources/Dev/"
 mean_var_path= "../Processed/"
