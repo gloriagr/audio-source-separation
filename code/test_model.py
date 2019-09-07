@@ -13,7 +13,7 @@ from tqdm import tqdm
 if __name__ == '__main__':
     inp_size = [513,52]
     t1=1
-    f1=513#513
+    f1=513
     t2=15
     f2=1
     N1=50
@@ -23,8 +23,7 @@ if __name__ == '__main__':
     beta = 0.01
     beta_vocals = 0.03
     batch_size = 1
-   num_epochs = 50
-    # num_epoches = 2
+    num_epochs = 50
 
     destination_path= '../AudioResults/'
     phase_path = '../Val/Phases/'
@@ -44,30 +43,35 @@ if __name__ == '__main__':
     if not os.path.exists(others_directory):
         os.makedirs(others_directory)
 
-
-    net = SepConvNet(t1,f1,t2,f2,N1,N2,inp_size,NN)
+    net = SepConvNet(t1, f1, t2, f2, N1, N2, inp_size, NN)
     net.load_state_dict(torch.load('Weights/Weights_5_95724.06152068662.pth')) #least score Weights so far
-    #net.load_state_dict(torch.load('Weights/Weights_norm_orig2.pth'))
     net.eval()
-    test_set = SourceSepTest(transforms = None)
-    test_loader = DataLoader(test_set, batch_size=batch_size,shuffle=False)
-    #import pdb;pdb.set_trace()
-    for i,(test_inp,test_phase_file,file_str) in tqdm(enumerate(test_loader)):
+    test_set = SourceSepTest(transforms=None)
+    test_loader = DataLoader(test_set, batch_size=batch_size, shuffle=False)
+    zeros = torch.zeros([1, 1, 513, 52])
+    for i, (test_inp, test_phase_file, file_str) in tqdm(enumerate(test_loader)):
         print('Testing, i='+str(i))
+        # if i == 949:
+        #     import pdb
+        #     pdb.set_trace()
+
+        if torch.all(torch.eq(test_inp, zeros)):
+            continue
+
         test_phase = np.load(phase_path+test_phase_file[0])
         
         mean = torch.mean(test_inp)
         std = torch.std(test_inp)
         test_inp_n = (test_inp-mean)/std
-        bass_mag, vocals_mag, drums_mag,others_mag = net(test_inp_n)
-        bass_mag, vocals_mag, drums_mag,others_mag = TimeFreqMasking(bass_mag, vocals_mag, drums_mag,others_mag)
+        bass_mag, vocals_mag, drums_mag, others_mag = net(test_inp_n)
+        bass_mag, vocals_mag, drums_mag, others_mag = TimeFreqMasking(bass_mag, vocals_mag, drums_mag,others_mag)
         bass_mag = bass_mag*test_inp
         vocals_mag = vocals_mag*test_inp
         drums_mag = drums_mag*test_inp
         others_mag = others_mag*test_inp
         
         regex = re.compile(r'\d+')
-        index=regex.findall(file_str[0])
-        reconstruct(test_phase, bass_mag, vocals_mag, drums_mag,others_mag,index[0],index[1],destination_path)
+        index = regex.findall(file_str[0])
+        reconstruct(test_phase, bass_mag, vocals_mag, drums_mag, others_mag, index[0], index[1], destination_path)
 
 #    list = sorted(glob.glob('*.wav'))
