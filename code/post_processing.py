@@ -7,9 +7,9 @@ import os
 import re
 
 def reconstruct(phase, bass_mag, vocals_mag, drums_mag,others_mag,song_num,segment_num,destination_path):
+	#import pdb; pdb.set_trace()
 	# Retrieve complex STFT
 	vocals = np.squeeze(vocals_mag.detach().numpy() * phase,axis= (0,1))
-	#print(vocals.shape)
 	bass = np.squeeze(bass_mag.detach().numpy() * phase, axis=(0,1))
 	drums = np.squeeze(drums_mag.detach().numpy() * phase, axis=(0,1))
 	others = np.squeeze(others_mag.detach().numpy() * phase, axis=(0,1))

@@ -43,7 +43,7 @@ for test_songs in (test_songs_list):
     sound_output_path = os.path.join(vocals_path,test_songs+'.wav')
     for segment in (vocals_list) :
         seg, sr = librosa.load(segment, sr=44100)
-        print(sr)
+        #print(sr)
         assert sr==44100
         combined_vocals= np.append(combined_vocals,seg)
     librosa.output.write_wav(sound_output_path,combined_vocals,sr)
