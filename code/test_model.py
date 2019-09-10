@@ -44,7 +44,7 @@ if __name__ == '__main__':
         os.makedirs(others_directory)
 
     net = SepConvNet(t1, f1, t2, f2, N1, N2, inp_size, NN)
-    net.load_state_dict(torch.load('Weights/Weights_5_95724.06152068662.pth')) #least score Weights so far
+    net.load_state_dict(torch.load('Weights/Weights_50_108558.79599884462.pth')) #least score Weights so far
     net.eval()
     test_set = SourceSepTest(transforms=None)
     test_loader = DataLoader(test_set, batch_size=batch_size, shuffle=False)
