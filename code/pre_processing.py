@@ -7,7 +7,7 @@ import os
 import re
 
 # change to the path where DSD100 is in
-path = "../../adversarial-audio-separation/AdversarialAudioSeparation/Data/DSD100/DSD100/"
+path = "C:\\Users\\daisp\\datasets\\DSD100\\"
 path_mixtures = path + "Mixtures/Dev/"
 path_sources = path + "Sources/Dev/"
 mean_var_path = "../Processed/"
@@ -17,7 +17,7 @@ bass_path = "../Processed/Bass"
 vocals_path = "../Processed/Vocals"
 drums_path = "../Processed/Drums"
 others_path = "../Processed/Others"
-source_dest_paths = [vocals_path, bass_path, drums_path, others_path]
+source_dest_paths = [bass_path, drums_path, others_path, vocals_path]
 
 path_val_mixtures = path + "Mixtures/Test/"
 path_val_sources = path + "Sources/Test/"
@@ -27,7 +27,7 @@ val_bass_path = "../Val/Bass"
 val_vocals_path = "../Val/Vocals"
 val_drums_path = "../Val/Drums"
 val_others_path = "../Val/Others"
-source_val_paths = [val_vocals_path, val_bass_path, val_drums_path, val_others_path]
+source_val_paths = [val_bass_path, val_drums_path, val_others_path, val_vocals_path]
 
 ### test paths for now same as the validation path!
 path_test_mixtures = path + "Mixtures/Test/"
@@ -38,7 +38,7 @@ test_bass_path = "../Test/Bass"
 test_vocals_path = "../Test/Vocals"
 test_drums_path = "../Test/Drums"
 test_others_path = "../Test/Others"
-source_test_paths = [test_vocals_path, test_bass_path, test_drums_path, test_others_path]
+source_test_paths = [test_bass_path, test_drums_path, test_others_path, test_vocals_path]
 
 
 def process(file_path, direc, destination_path, phase_bool, destination_phase_path):

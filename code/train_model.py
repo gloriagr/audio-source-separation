@@ -63,7 +63,7 @@ class MixedSquaredError(nn.Module):
     def __init__(self, weight=None, size_average=True):
         super(MixedSquaredError, self).__init__()
 
-    def forward(self, pred_bass, pred_vocals, pred_drums, pred_others, gt_bass, gt_vocals, gt_drums, gt_others):
+    def forward(self, pred_bass, pred_drums, pred_others, pred_vocals, gt_bass, gt_drums, gt_others, gt_vocals):
         L_sq = torch.sum((pred_bass - gt_bass).pow(2)) + torch.sum((pred_vocals - gt_vocals).pow(2)) + torch.sum(
             (pred_drums - gt_drums).pow(2))
         L_other = torch.sum((pred_bass - gt_others).pow(2)) + torch.sum((pred_drums - gt_others).pow(2))
@@ -75,7 +75,7 @@ class MixedSquaredError(nn.Module):
         return L_sq - alpha * L_diff - beta * L_other - beta_vocals * L_othervocals
 
 
-def TimeFreqMasking(bass, vocals, drums, others, cuda=0):
+def TimeFreqMasking(bass, drums, others, vocals, cuda=0):
     den = torch.abs(bass) + torch.abs(vocals) + torch.abs(drums) + torch.abs(others)
     if (cuda):
         den = den + 10e-8 * torch.cuda.FloatTensor(bass.size()).normal_()
@@ -87,7 +87,7 @@ def TimeFreqMasking(bass, vocals, drums, others, cuda=0):
     drums = torch.abs(drums) / den
     others = torch.abs(others) / den
 
-    return bass, vocals, drums, others
+    return bass, drums, vocals, others
 
 
 # mu=torch.load(os.path.join(mean_var_path,'mean.pt'))
@@ -120,7 +120,7 @@ def train():
         scheduler.step()
         train_loss = Average()
         net.train()
-        for i, (inp, gt_bass, gt_vocals, gt_drums, gt_others) in enumerate(train_loader):
+        for i, (inp, gt_bass, gt_drums, gt_others, gt_vocals) in enumerate(train_loader):
             mean = torch.mean(inp)
             std = torch.std(inp)
             inp_n = (inp - mean) / std
@@ -139,15 +139,15 @@ def train():
                 gt_drums = gt_drums.cuda()
                 gt_others = gt_others.cuda()
             optimizer.zero_grad()
-            o_bass, o_vocals, o_drums, o_others = net(inp_n)
+            o_bass, o_drums, o_others, o_vocals = net(inp_n)
 
-            mask_bass, mask_vocals, mask_drums, mask_others = TimeFreqMasking(o_bass, o_vocals, o_drums, o_others, cuda)
+            mask_bass, mask_drums, mask_others, mask_vocals = TimeFreqMasking(o_bass, o_drums, o_others, o_vocals, cuda)
             pred_drums = inp * mask_drums
             pred_vocals = inp * mask_vocals
             pred_bass = inp * mask_bass
             pred_others = inp * mask_others
 
-            loss = criterion(pred_bass, pred_vocals, pred_drums, pred_others, gt_bass, gt_vocals, gt_drums, gt_others)
+            loss = criterion(pred_bass, pred_drums, pred_others, pred_vocals, gt_bass, gt_drums, gt_others, gt_vocals)
             writer.add_scalar('Train Loss', loss, epoch)
             loss.backward()
             optimizer.step()
@@ -158,7 +158,7 @@ def train():
         val_loss = Average()
         net.eval()
         # pdb.set_trace()
-        for i, (val_inp, gt_bass, gt_vocals, gt_drums, gt_others) in enumerate(val_loader):
+        for i, (val_inp, gt_bass, gt_drums, gt_others, gt_vocals) in enumerate(val_loader):
             val_mean = torch.mean(val_inp)
             val_std = torch.std(val_inp)
             val_inp_n = (val_inp - val_mean) / val_std
@@ -177,8 +177,8 @@ def train():
                 gt_drums = gt_drums.cuda()
                 gt_others = gt_others.cuda()
 
-            o_bass, o_vocals, o_drums, o_others = net(val_inp_n)
-            mask_bass, mask_vocals, mask_drums, mask_others = TimeFreqMasking(o_bass, o_vocals, o_drums, o_others, cuda)
+            o_bass, o_drums, o_others, o_vocals = net(val_inp_n)
+            mask_bass, mask_drums, mask_others, mask_vocals = TimeFreqMasking(o_bass, o_drums, o_others, o_vocals, cuda)
             # print(val_inp.shape)
             # print(mask_drums.shape)
             # assert False
@@ -191,14 +191,14 @@ def train():
                 writer.add_images('Validation Input', val_inp, epoch)
                 writer.add_images('Validation Bass GT ', gt_bass, epoch)
                 writer.add_images('Validation Bass Pred ', pred_bass, epoch)
-                writer.add_images('Validation Vocals GT ', gt_vocals, epoch)
-                writer.add_images('Validation Vocals Pred ', pred_vocals, epoch)
                 writer.add_images('Validation Drums GT ', gt_drums, epoch)
                 writer.add_images('Validation Drums Pred ', pred_drums, epoch)
                 writer.add_images('Validation Other GT ', gt_others, epoch)
                 writer.add_images('Validation Others Pred ', pred_others, epoch)
+                writer.add_images('Validation Vocals GT ', gt_vocals, epoch)
+                writer.add_images('Validation Vocals Pred ', pred_vocals, epoch)
 
-            vloss = criterion(pred_bass, pred_vocals, pred_drums, pred_others, gt_bass, gt_vocals, gt_drums, gt_others)
+            vloss = criterion(pred_bass, pred_drums, pred_others, pred_vocals, gt_bass, gt_drums, gt_others, gt_vocals)
             writer.add_scalar('Validation loss', vloss, epoch)
             val_loss.update(vloss.item(), inp.size(0))
 
