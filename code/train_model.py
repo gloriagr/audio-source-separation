@@ -12,11 +12,14 @@ from data_loader import *
 from tensorboardX import SummaryWriter
 from torch.optim.lr_scheduler import MultiStepLR
 
-mean_var_path= "../Processed/"
+mean_var_path = "../Processed/"
 if not os.path.exists('Weights'):
     os.makedirs('Weights')
+
 #os.environ["CUDA_VISIBLE_DEVICES"]="0"
 #--------------------------
+
+
 class Average(object):
     def __init__(self):
         self.reset()
@@ -32,28 +35,29 @@ class Average(object):
     #property
     def avg(self):
         return self.sum / self.count
+
 #------------------------------
 # import csv
 writer = SummaryWriter()
 #----------------------------------------
 
-inp_size = [513,52]
-t1=1
-f1=513
-t2=15
-f2=1
-N1=50
-N2=30
-NN=128
+inp_size = [513, 52]
+t1 = 1
+f1 = 513
+t2 = 15
+f2 = 1
+N1 = 50
+N2 = 30
+NN = 128
 alpha = 0.005
 beta = 0.05
 beta_vocals = 0.08
 batch_size = 30
 num_epochs = 50
-#num_epochs = 2
 
 
 class MixedSquaredError(nn.Module):
+
     def __init__(self, weight=None, size_average=True):
         super(MixedSquaredError, self).__init__()
 
@@ -150,13 +154,13 @@ def train():
 
         val_loss = Average()
         net.eval()
-        #pdb.set_trace()
         for i,(val_inp, gt_bass,gt_vocals,gt_drums,gt_others) in enumerate(val_loader):
             val_mean = torch.mean(val_inp)
             val_std = torch.std(val_inp)
             val_inp_n = (val_inp-val_mean)/val_std
             
             val_inp = Variable(val_inp)
+            #torch.reshape(val_inp, (batch_size, inp_size[0], inp_size[1]))
             val_inp_n = Variable(val_inp_n)
             gt_bass = Variable(gt_bass)
             gt_vocals = Variable(gt_vocals)

@@ -23,6 +23,7 @@ if not os.path.exists(bass_directory):
     os.makedirs(bass_directory)
 if not os.path.exists(others_directory):
     os.makedirs(others_directory)
+
 for subdirs, dirs, files in os.walk(vocals_directory):
     print('finding list of songs ')
     for file in files :
@@ -88,4 +89,4 @@ for test_songs in (test_songs_list):
     for segment in (others_list) :
         seg, sr = librosa.load(segment,sr=44100)
         combined_others= np.append(combined_others,seg)
-    librosa.output.write_wav(sound_output_path,combined_others,sr)
+    librosa.output.write_wav(sound_output_pathsound_output_path,combined_others,sr)
