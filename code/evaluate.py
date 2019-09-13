@@ -5,62 +5,46 @@ import librosa
 
 ####################### MODIFY ##############################
 #### additional for loop to evaluate multiple songs #########
-# increase step to decrease time
-step = 10
-bass_gt_path = 'bass.wav'
-bass_rec_path = 'bass_rec.wav'
-vocal_gt_path = 'vocals.wav'
-vocal_rec_path = 'vocals_rec.wav'
-drums_gt_path = 'drums.wav'
-drums_rec_path = 'drums_rec.wav'
-other_gt_path = 'other.wav'
-other_rec_path = 'other_rec.wav'
+# increase step to sample less points and decrease time
+sample_step = 10
+bass_gt_path = '../Recovered_Songs_bigger5/bass/050.wav'
+bass_rec_path = r'C:\Users\daisp\datasets\DSD100\Sources\Test\050 - Zeno - Signs\bass.wav'
+vocal_gt_path = '../Recovered_Songs_bigger5/vocals/050.wav'
+vocal_rec_path = r'C:\Users\daisp\datasets\DSD100\Sources\Test\050 - Zeno - Signs\vocals.wav'
+drums_gt_path = '../Recovered_Songs_bigger5/drums/050.wav'
+drums_rec_path = r'C:\Users\daisp\datasets\DSD100\Sources\Test\050 - Zeno - Signs\drums.wav'
+others_gt_path = '../Recovered_Songs_bigger5/others/050.wav'
+others_rec_path = r'C:\Users\daisp\datasets\DSD100\Sources\Test\050 - Zeno - Signs\other.wav'
 ############################################################
 
+sample_rate, offset, duration = 44100, 30 * 0.3, 170 * 0.3
+gt_instruments_paths = [bass_gt_path, drums_gt_path, others_gt_path, vocal_gt_path]
+rec_instruments_paths = [bass_rec_path, drums_rec_path, others_rec_path, vocal_rec_path]
+gt_tracks, rec_tracks = [], []
 
-bass_gt, rate11 = librosa.load(bass_gt_path, sr=44100, offset=30 * 0.3, duration=170 * 0.3)
-bass_rec, rate21 = librosa.load(bass_rec_path, sr=44100)
+for gt_path, rec_path in zip(gt_instruments_paths, rec_instruments_paths):
+    gt_tracks.append(librosa.load(gt_path, sr=sample_rate, offset=offset, duration=duration)[0])
+    rec_tracks.append(librosa.load(rec_path, sr=sample_rate)[0])
 
-vocals_gt, rate12 = librosa.load(vocal_gt_path, sr=44100, offset=30 * 0.3, duration=170 * 0.3)
-vocals_rec, rate22 = librosa.load(vocal_rec_path, sr=44100)
+for gt_track, rec_track in zip(gt_tracks, rec_tracks):
+    # gt_track and rec_track are 2-element tuples whose first element contains the actual samples
+    # and the second element is the sample rate
+    gt_track = gt_track[0:rec_track.shape[0]:sample_step]
+    gt_track = np.transpose(gt_track.reshape(len(gt_track), 1))
 
-drums_gt, rate13 = librosa.load(drums_gt_path, sr=44100, offset=30 * 0.3, duration=170 * 0.3)
-drums_rec, rate23 = librosa.load(drums_rec_path, sr=44100)
+final_gt = np.concatenate(gt_tracks, axis=0)
+print("final_gt shape = " + str(final_gt.shape))
 
-other_gt, rate14 = librosa.load(other_gt_path, sr=44100, offset=30 * 0.3, duration=170 * 0.3)
-other_rec, rate24 = librosa.load(other_rec_path, sr=44100)
+for rec_track in rec_tracks:
+    # rec_track is a 2-element tuple whose first element contains the actual samples
+    # and the second element is the sample rate
+    rec_track = rec_track[0:rec_track.shape[0]:sample_step]
+    rec_track = np.transpose(rec_track.reshape(len(rec_track), 1))
 
-bass_gt = bass_gt[0:bass_rec.shape[0]:step]
-bass_gt = np.transpose(bass_gt.reshape(len(bass_gt), 1))
+final_rec = np.concatenate(rec_tracks, axis=0)
+print("final_gt shape = " + str(final_rec.shape))
 
-vocals_gt = vocals_gt[0:vocals_rec.shape[0]:step]
-vocals_gt = np.transpose(vocals_gt.reshape(len(vocals_gt), 1))
-
-drums_gt = drums_gt[0:drums_rec.shape[0]:step]
-drums_gt = np.transpose(drums_gt.reshape(len(drums_gt), 1))
-
-other_gt = other_gt[0:other_rec.shape[0]:step]
-other_gt = np.transpose(other_gt.reshape(len(other_gt), 1))
-
-final_gt = np.concatenate((bass_gt, vocals_gt, drums_gt, other_gt), axis=0)
-print(final_gt.shape)
-
-bass_rec = bass_rec[0:bass_rec.shape[0]:step]
-bass_rec = np.transpose(bass_rec.reshape(len(bass_rec), 1))
-
-vocals_rec = vocals_rec[0:vocals_rec.shape[0]:step]
-vocals_rec = np.transpose(vocals_rec.reshape(len(vocals_rec), 1))
-
-drums_rec = drums_rec[0:drums_rec.shape[0]:step]
-drums_rec = np.transpose(drums_rec.reshape(len(drums_rec), 1))
-
-other_rec = other_rec[0:other_rec.shape[0]:step]
-other_rec = np.transpose(other_rec.reshape(len(other_rec), 1))
-
-final_rec = np.concatenate((bass_rec, vocals_rec, drums_rec, other_rec), axis=0)
-print(final_rec.shape)
-
-SDR, SIR, SAR, perm = mir_eval.separation.bss_eval_sources(final_gt, final_rec)
+SDR, SIR, SAR, perm = mir_eval.separation.bss_eval_sources(final_rec, final_gt)
 
 print(SDR)
 print(SIR)
