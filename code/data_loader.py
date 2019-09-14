@@ -8,7 +8,7 @@ import re
 
 
 class SourceSepTrain(Dataset):
-    def __init__(self, path="C:\\Users\\daisp\\PycharmProjects\\audio-source-separation\\Processed\\Mixtures", transforms=None):
+    def __init__(self, path="../../adversarial-audio-separation/AdversarialAudioSeparation/Data/DSD100/DSD100/", transforms=None):
         # assuming this to be the directory containing all the magnitude spectrum
         # for all songs and all segments used in training
         self.path = path

@@ -55,14 +55,16 @@ if __name__ == '__main__':
         #     import pdb
         #     pdb.set_trace()
 
-        if torch.all(torch.eq(test_inp, zeros)):
-            continue
-
         test_phase = np.load(phase_path + test_phase_file[0])
 
         mean = torch.mean(test_inp)
         std = torch.std(test_inp)
-        test_inp_n = (test_inp - mean) / std
+
+        if torch.all(torch.eq(test_inp, zeros)):
+            test_inp_n = test_inp - mean
+        else:
+            test_inp_n = (test_inp - mean) / std
+
         bass_mag, drums_mag, others_mag, vocals_mag = net(test_inp_n)
         bass_mag, drums_mag, others_mag, vocals_mag = TimeFreqMasking(bass_mag, drums_mag, others_mag, vocals_mag)
         bass_mag = bass_mag * test_inp

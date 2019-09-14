@@ -7,7 +7,7 @@ import os
 import re
 
 # change to the path where DSD100 is in
-path = "C:\\Users\\daisp\\datasets\\DSD100\\"
+path = "../../adversarial-audio-separation/AdversarialAudioSeparation/Data/DSD100/DSD100/"
 path_mixtures = path + "Mixtures/Dev/"
 path_sources = path + "Sources/Dev/"
 mean_var_path = "../Processed/"
@@ -81,65 +81,52 @@ def process(file_path, direc, destination_path, phase_bool, destination_phase_pa
             if not os.path.exists(destination_phase_path):
                 os.makedirs(destination_phase_path)
             np.save(os.path.join(destination_phase_path, (index[0] + "_" + str(start) + '_p.npy')), phase)
-    return
 
 
 # --------- training data-------------------------------------
-
-import pdb;pdb.set_trace()
-for curr_path, dirs, files in os.walk(path_mixtures):
-  for direc in dirs:
-      print('working with training '+ direc)
-      for c,d,f in os.walk(path_mixtures + direc):
-          process(os.path.join(path_mixtures, direc, f[0]), direc, destination_path, True, phase_path)
-
-for curr_path, dirs, files in os.walk(path_sources):
-    for direc in dirs:
-        print('source with training ' + direc)
-        for s, d, file in os.walk(path_sources + direc):
-            for i in range(0, 4):
-                print(file[i])
-                process(file_path=os.path.join(path_sources, direc, file[i]), direc=direc,
-                        destination_path=source_dest_paths[i],
-                        phase_bool=False, destination_phase_path=phase_path)
-
-for curr_path, dirs, files in os.walk(path_sources):
-    for direc in dirs:
-        print('source with training '+ direc)
-        for c,d,file in os.walk(path_sources + direc):
-            for i in range(0, 4):
-                process(os.path.join(path_val_sources, direc, file[i]), direc, source_val_paths[i], False,
-                        val_phase_path)
-
-
+# for curr_path, dirs, files in os.walk(path_mixtures):
+#     for direc in dirs:
+#         print('working with training '+ direc)
+#         for c,d,f in os.walk(path_mixtures + direc):
+#             process(os.path.join(path_mixtures, direc, f[0]), direc, destination_path, True, phase_path)
+#
+# for curr_path, dirs, files in os.walk(path_sources):
+#     for direc in dirs:
+#         print('source with training ' + direc)
+#         for c, d, file in os.walk(path_sources + direc):
+#             for i in range(0, 4):
+#                 print(file[i])
+#                 process(file_path=os.path.join(path_sources, direc, file[i]), direc=direc,
+#                         destination_path=source_dest_paths[i],
+#                         phase_bool=False, destination_phase_path=phase_path)
 
 # ------------------------ Validation data-----------------------------------
 
 for curr_path, dirs, files in os.walk(path_val_mixtures):
     for direc in dirs:
-        print('working with validation '+ direc)
-        for c,d,f in os.walk(path_val_mixtures + direc):
-            process(os.path.join(path_val_mixtures, direc, f[0]), direc,validation_path, True, val_phase_path)
+        print('working with validation ' + direc)
+        for c, d, f in os.walk(path_val_mixtures + direc):
+            process(os.path.join(path_val_mixtures, direc, f[0]), direc, validation_path, True, val_phase_path)
 
 for curr_path, dirs, files in os.walk(path_val_sources):
     for direc in dirs:
         print('source with validation ' + direc)
-        for s, d, file in os.walk(path_val_sources + direc):
+        for c, d, file in os.walk(path_val_sources + direc):
             for i in range(0, 4):
                 process(os.path.join(path_val_sources, direc, file[i]), direc, source_val_paths[i], False,
                         val_phase_path)
 
 # ----------------------Testing data-------------------------------------------
-
-for curr_path, dirs, files in os.walk(path_test_mixtures):
-    for direc in dirs:
-        print('working with validation '+ direc)
-        for c,d,f in os.walk(path_test_mixtures + direc):
-            process(os.path.join(path_test_mixtures,direc,f[0]),direc,testing_path,True,test_phase_path)
-
-for curr_path, dirs, files in os.walk(path_test_sources):
-    for direc in dirs:
-        print('source with testset '+ direc)
-        for c,d,file in os.walk(path_test_sources + direc):
-          for i in range(0,4):
-                process(os.path.join(path_test_sources,direc,file[i]),direc,source_test_path[i],False,test_phase_path)
+#
+# for curr_path, dirs, files in os.walk(path_test_mixtures):
+#     for direc in dirs:
+#         print('working with validation ' + direc)
+#         for c, d, f in os.walk(path_test_mixtures + direc):
+#             process(os.path.join(path_test_mixtures, direc, f[0]), direc, testing_path, True, test_phase_path)
+#
+# for curr_path, dirs, files in os.walk(path_test_sources):
+#     for direc in dirs:
+#         print('source with testset ' + direc)
+#         for c, d, file in os.walk(path_test_sources + direc):
+#             for i in range(0, 4):
+#                 process(os.path.join(path_test_sources, direc, file[i]), direc,source_test_paths[i], False, test_phase_path)
