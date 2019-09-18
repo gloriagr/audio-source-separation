@@ -4,7 +4,7 @@ import torch.nn.functional as F
 
 
 class SepConvNet(nn.Module):
-    def __init__(self, t1, f1, t2, f2, N1, N2, input_shape=[513, 345], NN=128):
+    def __init__(self, t1, f1, t2, f2, N1, N2, input_shape, NN=128):
         super(SepConvNet, self).__init__()
         self.vconv_left = nn.Conv2d(1, N1, kernel_size=(f1, t1), padding=0)
         self.hconv_left = nn.Conv2d(N1, N2, kernel_size=(f2, t2))

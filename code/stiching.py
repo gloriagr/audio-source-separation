@@ -4,6 +4,7 @@ import numpy as np
 import os
 import re
 import glob
+from natsort import natsorted
 
 destination_path = '../Recovered_Songs_bigger5/'
 vocals_directory = '../AudioResults/vocals'
@@ -39,7 +40,7 @@ for test_songs in (test_songs_list):
     sr = None
     print('testing,..'+test_songs)
     print('Stitching Vocals')
-    vocals_list = sorted(glob.glob(os.path.join(vocals_directory,test_songs + "*")))
+    vocals_list = natsorted(glob.glob(os.path.join(vocals_directory,test_songs + "*")))
     vocals_path = os.path.join(destination_path, 'vocals')
     if not os.path.exists(vocals_path):
         os.makedirs(vocals_path)
@@ -53,7 +54,7 @@ for test_songs in (test_songs_list):
     print('Stitching Bass')
     combined_bass = np.array([])
     sr = None
-    bass_list = sorted(glob.glob(os.path.join(bass_directory, test_songs + "*")))
+    bass_list = natsorted(glob.glob(os.path.join(bass_directory, test_songs + "*")))
     bass_path = os.path.join(destination_path, 'bass')
     if not os.path.exists(bass_path):
         os.makedirs(bass_path)
@@ -67,7 +68,7 @@ for test_songs in (test_songs_list):
     print('Stitching Drums')
     combined_drums = np.array([])
     sr = None
-    drums_list = sorted(glob.glob(os.path.join(drums_directory, test_songs + "*")))
+    drums_list = natsorted(glob.glob(os.path.join(drums_directory, test_songs + "*")))
     drums_path = os.path.join(destination_path, 'drums')
     if not os.path.exists(drums_path):
         os.makedirs(drums_path)
@@ -80,7 +81,7 @@ for test_songs in (test_songs_list):
     print('Stitching Others')
     combined_others = np.array([])
     sr = None
-    others_list = sorted(glob.glob(os.path.join(others_directory, test_songs + "*")))
+    others_list = natsorted(glob.glob(os.path.join(others_directory, test_songs + "*")))
     others_path = os.path.join(destination_path, 'others')
     if not os.path.exists(others_path):
         os.makedirs(others_path)

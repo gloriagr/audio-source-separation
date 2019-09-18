@@ -155,13 +155,12 @@ def train():
 
         val_loss = Average()
         net.eval()
-        for i, (val_inp, gt_bass,gt_vocals,gt_drums,gt_others) in enumerate(val_loader):
+        for i, (val_inp, gt_bass, gt_drums, gt_others, gt_vocals) in enumerate(val_loader):
             val_mean = torch.mean(val_inp)
             val_std = torch.std(val_inp)
             val_inp_n = (val_inp - val_mean) / val_std
 
             val_inp = Variable(val_inp)
-            #torch.reshape(val_inp, (batch_size, inp_size[0], inp_size[1]))
             val_inp_n = Variable(val_inp_n)
             gt_bass = Variable(gt_bass)
             gt_vocals = Variable(gt_vocals)
@@ -177,9 +176,6 @@ def train():
 
             o_bass, o_drums, o_others, o_vocals = net(val_inp_n)
             mask_bass, mask_drums, mask_others, mask_vocals = TimeFreqMasking(o_bass, o_drums, o_others, o_vocals, cuda)
-            # print(val_inp.shape)
-            # print(mask_drums.shape)
-            # assert False
             pred_drums = val_inp * mask_drums
             pred_vocals = val_inp * mask_vocals
             pred_bass = val_inp * mask_bass

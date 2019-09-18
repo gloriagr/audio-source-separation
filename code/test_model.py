@@ -1,5 +1,3 @@
-import math
-
 import torch
 import numpy as np
 import glob
@@ -11,6 +9,7 @@ from data_loader import SourceSepTest
 from post_processing import reconstruct
 from train_model import TimeFreqMasking
 from tqdm import tqdm
+
 
 if __name__ == '__main__':
     inp_size = [513, 52]
@@ -36,21 +35,20 @@ if __name__ == '__main__':
 
     if not os.path.exists(destination_path):
         os.makedirs(destination_path)
-    if not os.path.exists(vocals_directory):
-        os.makedirs(vocals_directory)
-    if not os.path.exists(drums_directory):
-        os.makedirs(drums_directory)
     if not os.path.exists(bass_directory):
         os.makedirs(bass_directory)
+    if not os.path.exists(drums_directory):
+        os.makedirs(drums_directory)
     if not os.path.exists(others_directory):
         os.makedirs(others_directory)
+    if not os.path.exists(vocals_directory):
+        os.makedirs(vocals_directory)
 
     net = SepConvNet(t1, f1, t2, f2, N1, N2, inp_size, NN)
     net.load_state_dict(torch.load('Weights/Weights_50_96333.25076612015.pth'))  # least score Weights so far
     net.eval()
     test_set = SourceSepTest(transforms=None)
     test_loader = DataLoader(test_set, batch_size=batch_size, shuffle=False)
-    zeros = torch.zeros([1, 1, 513, 52])
     for i, (test_inp, test_phase_file, file_str) in tqdm(enumerate(test_loader)):
         print('Testing, i=' + str(i))
         # if i == 949:

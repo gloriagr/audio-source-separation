@@ -46,14 +46,13 @@ def process(file_path, direc, destination_path, phase_bool, destination_phase_pa
     duration = librosa.get_duration(signal, samp_rate)
     regex = re.compile(r'\d+')
     index = regex.findall(direc)
+    # print(index)
+    num_segments = 0
+    # mean=np.zeros((513,52))
+    # var=np.zeros((513,52))
     for start in range(30, int(200)):
         wave_array, fs = librosa.load(file_path, sr=44100, offset=start*0.3, duration=0.3)
 
-        mag, phase = librosa.magphase(librosa.stft(wave_array, n_fft=1024, hop_length=256, window='hann', center='True'))
-        #mean+=mag
-        #num_segments+=1;
-        if not os.path.exists(destination_path):
-            os.makedirs(destination_path)
         mag, phase = librosa.magphase(
             librosa.stft(wave_array, n_fft=1024, hop_length=256, window='hann', center=True))
         # mean+=mag
@@ -64,16 +63,6 @@ def process(file_path, direc, destination_path, phase_bool, destination_phase_pa
         # print(torch.from_numpy(np.expand_dims(mag,axis=0)).shape)
 
         # magnitude stored as tensor, phase as np array
-        save_path = os.path.join(destination_path, (index[0] + "_" + str(start) + '_m.pt'))
-        torch.save(torch.from_numpy(np.expand_dims(mag, axis=0)), save_path)
-
-        if phase_bool:
-            if not os.path.exists(destination_phase_path):
-                os.makedirs(destination_phase_path)
-            np.save(os.path.join(destination_phase_path, (index[0] + "_" +str(start) + '_p.npy')), phase)
-
-
-        # magnitude stored as tensor, phase as np array
         # pickle.dump(torch.from_numpy(np.expand_dims(mag,axis=2)),open(os.path.join(destination_path,(index[0] +"_" + str(start) +'_m.pt')),'wb'))
         torch.save(torch.from_numpy(np.expand_dims(mag, axis=0)),
                    os.path.join(destination_path, (index[0] + "_" + str(start) + '_m.pt')))
@@ -81,52 +70,60 @@ def process(file_path, direc, destination_path, phase_bool, destination_phase_pa
             if not os.path.exists(destination_phase_path):
                 os.makedirs(destination_phase_path)
             np.save(os.path.join(destination_phase_path, (index[0] + "_" + str(start) + '_p.npy')), phase)
+    return
 
 
 # --------- training data-------------------------------------
-# for curr_path, dirs, files in os.walk(path_mixtures):
-#     for direc in dirs:
-#         print('working with training '+ direc)
-#         for c,d,f in os.walk(path_mixtures + direc):
-#             process(os.path.join(path_mixtures, direc, f[0]), direc, destination_path, True, phase_path)
-#
-# for curr_path, dirs, files in os.walk(path_sources):
-#     for direc in dirs:
-#         print('source with training ' + direc)
-#         for c, d, file in os.walk(path_sources + direc):
-#             for i in range(0, 4):
-#                 print(file[i])
-#                 process(file_path=os.path.join(path_sources, direc, file[i]), direc=direc,
-#                         destination_path=source_dest_paths[i],
-#                         phase_bool=False, destination_phase_path=phase_path)
+
+for subdirs, dirs, files in os.walk(path_mixtures):
+    for direc in dirs:
+        print('working with training ' + direc)
+        total_mean = 0
+        total_num_segments = 0
+        for s, d, f in os.walk(path_mixtures + direc):
+            process(os.path.join(path_mixtures, direc, f[0]), direc, destination_path, True, phase_path)
+
+
+for subdirs, dirs, files in os.walk(path_sources):
+    for direc in dirs:
+        print('source with training ' + direc)
+        for s, d, file in os.walk(path_sources + direc):
+            for i in range(0, 4):
+                print(file[i])
+                process(file_path=os.path.join(path_sources, direc, file[i]), direc=direc,
+                        destination_path=source_dest_paths[i],
+                        phase_bool=False, destination_phase_path=phase_path)
 
 # ------------------------ Validation data-----------------------------------
 
-for curr_path, dirs, files in os.walk(path_val_mixtures):
+for subdirs, dirs, files in os.walk(path_val_mixtures):
     for direc in dirs:
         print('working with validation ' + direc)
-        for c, d, f in os.walk(path_val_mixtures + direc):
+        for s, d, f in os.walk(path_val_mixtures + direc):
             process(os.path.join(path_val_mixtures, direc, f[0]), direc, validation_path, True, val_phase_path)
 
-for curr_path, dirs, files in os.walk(path_val_sources):
+for subdirs, dirs, files in os.walk(path_val_sources):
     for direc in dirs:
         print('source with validation ' + direc)
-        for c, d, file in os.walk(path_val_sources + direc):
+        for s, d, file in os.walk(path_val_sources + direc):
             for i in range(0, 4):
+                print(file[i])
                 process(os.path.join(path_val_sources, direc, file[i]), direc, source_val_paths[i], False,
                         val_phase_path)
 
 # ----------------------Testing data-------------------------------------------
+
+# for subdirs, dirs, files in os.walk(path_test_mixtures):
+#	for direc in dirs:
+#		print('working with validation '+ direc)
+#		for s,d,f in os.walk(path_test_mixtures + direc):
 #
-# for curr_path, dirs, files in os.walk(path_test_mixtures):
-#     for direc in dirs:
-#         print('working with validation ' + direc)
-#         for c, d, f in os.walk(path_test_mixtures + direc):
-#             process(os.path.join(path_test_mixtures, direc, f[0]), direc, testing_path, True, test_phase_path)
+#			process(os.path.join(path_test_mixtures,direc,f[0]),direc,testing_path,True,test_phase_path)
 #
-# for curr_path, dirs, files in os.walk(path_test_sources):
-#     for direc in dirs:
-#         print('source with testset ' + direc)
-#         for c, d, file in os.walk(path_test_sources + direc):
-#             for i in range(0, 4):
-#                 process(os.path.join(path_test_sources, direc, file[i]), direc,source_test_paths[i], False, test_phase_path)
+# for subdirs, dirs, files in os.walk(path_test_sources):
+#	for direc in dirs:
+#		print('source with testset '+ direc)
+#		for s,d,file in os.walk(path_test_sources + direc):
+#			for i in range(0,4):
+#				print(file[i])
+#				process(os.path.join(path_test_sources,direc,file[i]),direc,source_test_paths[i],False,test_phase_path)
