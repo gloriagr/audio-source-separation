@@ -44,7 +44,7 @@ writer = SummaryWriter()
 inp_size = [513, 52]
 t1 = 1
 f1 = 513
-t2 = 15
+t2 = 12
 f2 = 1
 N1 = 50
 N2 = 30
@@ -85,7 +85,7 @@ def TimeFreqMasking(bass, drums, others, vocals, cuda=0):
     drums = torch.abs(drums) / den
     others = torch.abs(others) / den
 
-    return bass, drums, vocals, others
+    return bass, drums, others, vocals
 
 
 # mu=torch.load(os.path.join(mean_var_path,'mean.pt'))
