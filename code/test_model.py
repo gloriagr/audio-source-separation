@@ -24,7 +24,7 @@ if __name__ == '__main__':
     beta = 0.01
     beta_vocals = 0.03
     batch_size = 1
-    num_epochs = 50
+    num_epochs = 20
 
     destination_path = '../AudioResults/'
     phase_path = '../Val/Phases/'
@@ -43,9 +43,8 @@ if __name__ == '__main__':
         os.makedirs(others_directory)
     if not os.path.exists(vocals_directory):
         os.makedirs(vocals_directory)
-
     net = SepConvNet(t1, f1, t2, f2, N1, N2, inp_size, NN)
-    net.load_state_dict(torch.load('Weights/Weights_50_96333.25076612015.pth'))  # least score Weights so far
+    net.load_state_dict(torch.load('Weights/Weights_1_41802.925.pth',  map_location='cpu'))  # least score Weights so far
     net.eval()
     test_set = SourceSepTest(transforms=None)
     test_loader = DataLoader(test_set, batch_size=batch_size, shuffle=False)
@@ -66,8 +65,8 @@ if __name__ == '__main__':
             test_inp_n = (test_inp - mean) / std
         else:
             test_inp_n = torch.zeros_like(test_inp)
-        bass_mag, drums_mag, others_mag, vocals_mag = net(test_inp_n)
-        bass_mag, drums_mag, others_mag, vocals_mag = TimeFreqMasking(bass_mag, drums_mag, others_mag, vocals_mag)
+        bass_mag, vocals_mag, drums_mag, others_mag = net(test_inp_n)
+        bass_mag, vocals_mag, drums_mag, others_mag = TimeFreqMasking(bass_mag, vocals_mag, drums_mag, others_mag)
         bass_mag = bass_mag * test_inp
         vocals_mag = vocals_mag * test_inp
         drums_mag = drums_mag * test_inp
@@ -75,6 +74,6 @@ if __name__ == '__main__':
 
         regex = re.compile(r'\d+')
         index = regex.findall(file_str[0])
-        reconstruct(test_phase, bass_mag, drums_mag, others_mag, vocals_mag, index[0], index[1], destination_path)
-
-#    list = sorted(glob.glob('*.wav'))
+        reconstruct(test_phase, bass_mag, vocals_mag, drums_mag, others_mag, index[0], index[1], destination_path)
+        #if int(index[0]) > 1:
+        #    break

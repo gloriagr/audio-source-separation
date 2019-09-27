@@ -45,7 +45,7 @@ rec_tracks[:] = [np.transpose(rec_track.reshape(len_rec, 1)) for rec_track in re
 final_rec = np.concatenate(rec_tracks, axis=0)
 
 
-SDR, SIR, SAR, perm = mir_eval.separation.bss_eval_sources(final_gt, final_gt)
+SDR, SIR, SAR, perm = mir_eval.separation.bss_eval_sources(final_gt, final_rec)
 
 print(SDR)
 print(SIR)
