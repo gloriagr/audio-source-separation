@@ -8,11 +8,11 @@ import re
 
 
 def reconstruct(phase, bass_mag, vocals_mag, drums_mag, others_mag, song_num, segment_num, destination_path):
-	# Retrieve complex STFT
-	vocals = np.squeeze(vocals_mag.detach().numpy() * phase, axis=(0, 1))
-	bass = np.squeeze(bass_mag.detach().numpy() * phase, axis=(0, 1))
-	drums = np.squeeze(drums_mag.detach().numpy() * phase, axis=(0, 1))
-	others = np.squeeze(others_mag.detach().numpy() * phase, axis=(0, 1))
+    # Retrieve complex STFT
+    vocals = np.squeeze(vocals_mag.detach().numpy() * phase, axis=(0, 1))
+    bass = np.squeeze(bass_mag.detach().numpy() * phase, axis=(0, 1))
+    drums = np.squeeze(drums_mag.detach().numpy() * phase, axis=(0, 1))
+    others = np.squeeze(others_mag.detach().numpy() * phase, axis=(0, 1))
 
     # Perform ISTFT
     vocals_audio = librosa.istft(vocals, win_length=1024, hop_length=256, window='hann', center=True)

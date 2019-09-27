@@ -7,15 +7,16 @@ import os
 ####################### MODIFY ##############################
 #### additional for loop to evaluate multiple songs #########
 # increase step to sample less points and decrease time
+dataset_path = 'C:/Users/daisp/datasets/DSD100/'
 sample_step = 10
 bass_rec_path = '../Recovered_Songs_bigger5/bass/001.wav'
-bass_gt_path = '../../adversarial-audio-separation/AdversarialAudioSeparation/Data/DSD100/DSD100/Sources/Test/001 - ANiMAL - Clinic A/bass.wav'
+bass_gt_path = dataset_path + 'Sources/Test/001 - ANiMAL - Clinic A/bass.wav'
 vocal_rec_path = '../Recovered_Songs_bigger5/vocals/001.wav'
-vocal_gt_path = '../../adversarial-audio-separation/AdversarialAudioSeparation/Data/DSD100/DSD100/Sources/Test/001 - ANiMAL - Clinic A/vocals.wav'
+vocal_gt_path = dataset_path + 'Sources/Test/001 - ANiMAL - Clinic A/vocals.wav'
 drums_rec_path = '../Recovered_Songs_bigger5/drums/001.wav'
-drums_gt_path = '../../adversarial-audio-separation/AdversarialAudioSeparation/Data/DSD100/DSD100/Sources/Test/001 - ANiMAL - Clinic A/drums.wav'
+drums_gt_path = dataset_path + 'Sources/Test/001 - ANiMAL - Clinic A/drums.wav'
 others_rec_path = '../Recovered_Songs_bigger5/others/001.wav'
-others_gt_path = '../../adversarial-audio-separation/AdversarialAudioSeparation/Data/DSD100/DSD100/Sources/Test/001 - ANiMAL - Clinic A/other.wav'
+others_gt_path = dataset_path + 'Sources/Test/001 - ANiMAL - Clinic A/other.wav'
 ############################################################
 
 sample_rate, offset, duration = 44100, 30 * 0.3, 170 * 0.3
@@ -44,7 +45,7 @@ rec_tracks[:] = [np.transpose(rec_track.reshape(len_rec, 1)) for rec_track in re
 final_rec = np.concatenate(rec_tracks, axis=0)
 
 
-SDR, SIR, SAR, perm = mir_eval.separation.bss_eval_sources(final_rec, final_rec)
+SDR, SIR, SAR, perm = mir_eval.separation.bss_eval_sources(final_gt, final_gt)
 
 print(SDR)
 print(SIR)
