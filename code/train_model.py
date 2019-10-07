@@ -49,8 +49,8 @@ NN = 128
 alpha = 0.05
 beta = 0.01
 beta_vocals = 0.3
-batch_size = 8
-num_epochs = 100
+batch_size = 10
+num_epochs = 20
 
 
 class MixedSquaredError(nn.Module):
@@ -64,6 +64,20 @@ class MixedSquaredError(nn.Module):
         L_othervocals = torch.sum((pred_vocals - gt_others).pow(2))
         L_diff = torch.sum((pred_bass - pred_vocals).pow(2)) + torch.sum((pred_bass - pred_drums).pow(2)) + torch.sum(
            (pred_vocals - pred_drums).pow(2))
+
+        return (L_sq - alpha * L_diff - beta * L_other - beta_vocals * L_othervocals)
+
+
+class MSELoss(nn.Module):
+    def __init__(self, weight=None, size_average=True):
+        super(MSELoss, self).__init__()
+
+    def forward(self, pred_bass, pred_vocals, pred_drums, pred_others, gt_bass, gt_vocals, gt_drums, gt_others):
+        L_sq = F.mse_loss(pred_bass, gt_bass) + F.mse_loss(pred_vocals, gt_vocals) + F.mse_loss(pred_drums, gt_drums) + F.mse_loss(pred_others, gt_others)
+        L_other = F.mse_loss(pred_bass, gt_others) + F.mse_loss(pred_drums, gt_others)
+        # + torch.sum((pred_vocals-gt_others).pow(2))
+        L_othervocals = F.mse_loss(pred_vocals, gt_others)
+        L_diff = F.mse_loss(pred_bass, pred_vocals) + F.mse_loss(pred_bass, pred_drums) +F.mse_loss(pred_vocals, pred_drums)
 
         return (L_sq - alpha * L_diff - beta * L_other - beta_vocals * L_othervocals)
 
@@ -108,13 +122,13 @@ def train():
     cuda = torch.cuda.is_available()
     print("cuda: ", cuda)
     net = SepConvNet(t1, f1, t2, f2, N1, N2, inp_size, NN)
-    criterion = MixedSquaredError()
+    criterion = MSELoss()
     if cuda:
         net = net.cuda()
         criterion = criterion.cuda()
     optimizer = torch.optim.Adam(net.parameters(), lr=1e-2)
     #     scheduler = CyclicLinearLR(optimizer, milestones=[60,120])
-    scheduler = MultiStepLR(optimizer)  # milestones
+    scheduler = MultiStepLR(optimizer, milestones=[10])  # milestones
     train_loader = DataLoader(train_set, batch_size=batch_size, shuffle=True)
     val_set = SourceSepVal(transforms=None)
     val_loader = DataLoader(val_set, batch_size=batch_size, shuffle=False)
