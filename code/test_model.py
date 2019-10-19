@@ -48,14 +48,8 @@ if __name__ == '__main__':
     net.eval()
     test_set = SourceSepTest(transforms=None)
     test_loader = DataLoader(test_set, batch_size=batch_size, shuffle=False)
-    for i, (test_inp, test_phase_file, file_str) in tqdm(enumerate(test_loader)):
+    for i, (test_inp, test_phase_file, file_str) in enumerate(test_loader):
         print('Testing, i=' + str(i))
-        # if i == 949:
-        #     import pdb
-        #     pdb.set_trace()
-
-        # if torch.all(torch.eq(test_inp, zeros)):
-        #     continue
 
         test_phase = np.load(phase_path + test_phase_file[0])
 
