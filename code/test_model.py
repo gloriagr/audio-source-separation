@@ -27,7 +27,7 @@ if __name__ == '__main__':
     num_epochs = 20
 
     destination_path = '../AudioResults/'
-    phase_path = '../Val/Phases/'
+    phase_path = '../Test/Phases/'
     vocals_directory = '../AudioResults/vocals'
     drums_directory = '../AudioResults/drums'
     bass_directory = '../AudioResults/bass'
@@ -44,7 +44,7 @@ if __name__ == '__main__':
     if not os.path.exists(vocals_directory):
         os.makedirs(vocals_directory)
     net = SepConvNet(t1, f1, t2, f2, N1, N2, inp_size, NN)
-    net.load_state_dict(torch.load('Weights/Weights_1_41802.925.pth',  map_location='cpu'))  # least score Weights so far
+    net.load_state_dict(torch.load('Weights/Weights_50_62422.012325942094.pth',  map_location='cpu'))  # least score Weights so far
     net.eval()
     test_set = SourceSepTest(transforms=None)
     test_loader = DataLoader(test_set, batch_size=batch_size, shuffle=False)

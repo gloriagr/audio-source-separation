@@ -6,7 +6,7 @@ import os
 import re
 
 # change to the path where DSD100 is in
-path = "../../adversarial-audio-separation/AdversarialAudioSeparation/Data/DSD100/DSD100/"
+path = "C:/Users/daisp/datasets/DSD100/"
 path_mixtures = path + "Mixtures/Dev/"
 path_sources = path + "Sources/Dev/"
 mean_var_path = "../Processed/"

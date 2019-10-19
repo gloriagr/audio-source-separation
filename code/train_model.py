@@ -1,13 +1,12 @@
 import torch
 from torch.utils.data import DataLoader
 from torch.autograd import Variable
-from build_model_original import *
-# from build_model_old import *
+# from build_model_original import *
+from build_model_gcn import *
 # from cyclicAnnealing import CyclicLinearLR
 from data_loader import *
 #from tensorboardX import SummaryWriter
 from torch.optim.lr_scheduler import MultiStepLR
-import numpy
 
 # mean_var_path = "Processed/"
 if not os.path.exists('Weights'):
@@ -46,11 +45,11 @@ f2 = 1
 N1 = 50
 N2 = 30
 NN = 128
-alpha = 0.05
+alpha = 0.001
 beta = 0.01
-beta_vocals = 0.3
+beta_vocals = 0.03
 batch_size = 10
-num_epochs = 20
+num_epochs = 50
 
 
 class MixedSquaredError(nn.Module):
@@ -58,26 +57,12 @@ class MixedSquaredError(nn.Module):
         super(MixedSquaredError, self).__init__()
 
     def forward(self, pred_bass, pred_vocals, pred_drums, pred_others, gt_bass, gt_vocals, gt_drums, gt_others):
-        L_sq = torch.sum((pred_bass - gt_bass).pow(2)) + torch.sum((pred_vocals - gt_vocals).pow(2)) + torch.sum((pred_drums - gt_drums).pow(2)) + torch.sum((pred_others - gt_others).pow(2))
+        L_sq = torch.sum((pred_bass - gt_bass).pow(2)) + torch.sum((pred_vocals - gt_vocals).pow(2)) + torch.sum( (pred_drums - gt_drums).pow(2)) + torch.sum((pred_others - gt_others).pow(2))
         L_other = torch.sum((pred_bass - gt_others).pow(2)) + torch.sum((pred_drums - gt_others).pow(2))
         # + torch.sum((pred_vocals-gt_others).pow(2))
         L_othervocals = torch.sum((pred_vocals - gt_others).pow(2))
         L_diff = torch.sum((pred_bass - pred_vocals).pow(2)) + torch.sum((pred_bass - pred_drums).pow(2)) + torch.sum(
            (pred_vocals - pred_drums).pow(2))
-
-        return (L_sq - alpha * L_diff - beta * L_other - beta_vocals * L_othervocals)
-
-
-class MSELoss(nn.Module):
-    def __init__(self, weight=None, size_average=True):
-        super(MSELoss, self).__init__()
-
-    def forward(self, pred_bass, pred_vocals, pred_drums, pred_others, gt_bass, gt_vocals, gt_drums, gt_others):
-        L_sq = F.mse_loss(pred_bass, gt_bass) + F.mse_loss(pred_vocals, gt_vocals) + F.mse_loss(pred_drums, gt_drums) + F.mse_loss(pred_others, gt_others)
-        L_other = F.mse_loss(pred_bass, gt_others) + F.mse_loss(pred_drums, gt_others)
-        # + torch.sum((pred_vocals-gt_others).pow(2))
-        L_othervocals = F.mse_loss(pred_vocals, gt_others)
-        L_diff = F.mse_loss(pred_bass, pred_vocals) + F.mse_loss(pred_bass, pred_drums) +F.mse_loss(pred_vocals, pred_drums)
 
         return (L_sq - alpha * L_diff - beta * L_other - beta_vocals * L_othervocals)
 
@@ -106,35 +91,21 @@ train_set = SourceSepTrain(transforms=None)
 
 # transformation_test = transforms.Compose([ transforms.Normalize(mean = 0.0, std =1./var), transforms.Normalize(mean = -1*mu, std = 1.0),])
 
-def count_parameters(model):
-    total_param = 0
-    for name, param in model.named_parameters():
-        if param.requires_grad:
-            num_param = numpy.prod(param.size())
-            if param.dim() > 1:
-                print(name, ':', 'x'.join(str(x) for x in list(param.size())), '=', num_param)
-            else:
-                print(name, ':', num_param)
-            total_param += num_param
-    return total_param
 
 def train():
     cuda = torch.cuda.is_available()
     print("cuda: ", cuda)
     net = SepConvNet(t1, f1, t2, f2, N1, N2, inp_size, NN)
-    criterion = MSELoss()
+    criterion = MixedSquaredError()
     if cuda:
         net = net.cuda()
         criterion = criterion.cuda()
-    optimizer = torch.optim.Adam(net.parameters(), lr=1e-2)
+    optimizer = torch.optim.Adam(net.parameters(), lr=1e-3)
     #     scheduler = CyclicLinearLR(optimizer, milestones=[60,120])
-    scheduler = MultiStepLR(optimizer, milestones=[10])  # milestones
+    scheduler = MultiStepLR(optimizer, milestones=[40])
     train_loader = DataLoader(train_set, batch_size=batch_size, shuffle=True)
     val_set = SourceSepVal(transforms=None)
     val_loader = DataLoader(val_set, batch_size=batch_size, shuffle=False)
-    #print('number of trainable parameters =', count_parameters(net))
-    minimum = 1e9
-    epochs_no_improv = 0
     for epoch in range(num_epochs):
         net.train()
         train_loss = Average()
@@ -170,7 +141,7 @@ def train():
             optimizer.step()
             train_loss.update(loss.item(), inp.size(0))
             # for param_group in optimizer.param_groups:
-            #    writer.add_scalar('Learning Rate', param_group['lr'], epoch)
+            #    writer.add_scalar('Learning Rate', param_group['lr'])
 
         val_loss = Average()
         net.eval()
@@ -218,16 +189,6 @@ def train():
         scheduler.step()
         print("Epoch {}, Training Loss: {}, Validation Loss: {}".format(epoch + 1, train_loss.avg(), val_loss.avg()))
         torch.save(net.state_dict(), 'Weights/Weights_{}_{}.pth'.format(epoch + 1, val_loss.avg()))
-        if val_loss.avg() < minimum:
-            epochs_no_improv = 0
-            minimum = val_loss.avg()
-        else:
-            epochs_no_improv += 1
-
-        if epochs_no_improv > 4:
-            break
-
-  #  writer.close()
     return net
 
 
