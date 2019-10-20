@@ -6,7 +6,7 @@ import os
 import re
 
 # change to the path where DSD100 is in
-path = "../../adversarial-audio-separation/AdversarialAudioSeparation/Data/DSD100/DSD100/"
+path = "../../adversarial-audio-separation/AdversarialAudioSeparation/Data/DSD100/DSD100/" #path to DSD100/
 path_mixtures = path + "Mixtures/Dev/"
 path_sources = path + "Sources/Dev/"
 mean_var_path = "../Processed/"
@@ -45,10 +45,7 @@ def process(file_path, direc, destination_path, phase_bool, destination_phase_pa
     duration = librosa.get_duration(signal, samp_rate)
     regex = re.compile(r'\d+')
     index = regex.findall(direc)
-    # print(index)
-    num_segments = 0
-    # mean=np.zeros((513,52))
-    # var=np.zeros((513,52))
+
     for start in range(30, int(200)):
         wave_array, fs = librosa.load(file_path, sr=44100, offset=start*0.3, duration=0.3)
 
@@ -62,6 +59,7 @@ def process(file_path, direc, destination_path, phase_bool, destination_phase_pa
         # pickle.dump(torch.from_numpy(np.expand_dims(mag,axis=2)),open(os.path.join(destination_path,(index[0] +"_" + str(start) +'_m.pt')),'wb'))
         torch.save(torch.from_numpy(np.expand_dims(mag, axis=0)),
                    os.path.join(destination_path, (index[0] + "_" + str(start) + '_m.pt')))
+
         if phase_bool:
             if not os.path.exists(destination_phase_path):
                 os.makedirs(destination_phase_path)
@@ -74,8 +72,6 @@ def process(file_path, direc, destination_path, phase_bool, destination_phase_pa
 for subdirs, dirs, files in os.walk(path_mixtures):
     for direc in dirs:
         print('working with training ' + direc)
-        total_mean = 0
-        total_num_segments = 0
         for s, d, f in os.walk(path_mixtures + direc):
             process(os.path.join(path_mixtures, direc, f[0]), direc, destination_path, True, phase_path)
 

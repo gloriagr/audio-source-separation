@@ -4,8 +4,8 @@ from natsort import natsorted
 
 folders = ["Bass", "Drums", "Mixtures", "Others", "Phases", "Vocals"]
 
-src_path_train_1 = "../Processed/"
-src_path_train_2 = "../Val/"
+src_path_train_1 = "../Processed/" #location of the Processed directory that was created in pre-processing
+src_path_train_2 = "../Val/" #location of the Val directory that was created in pre-processing
 dst_path_train = "../Train/"
 if not os.path.exists(dst_path_train):
     os.makedirs(dst_path_train)
@@ -13,7 +13,7 @@ for folder in folders:
     if not os.path.exists(dst_path_train + folder):
         os.makedirs(dst_path_train + folder)
 
-src_path_val = "../Processed/"
+src_path_val = "../Processed/" #location of the Processed directory that was created in pre-processing
 dst_path_val = "../Validation/"
 if not os.path.exists(dst_path_val):
     os.makedirs(dst_path_val)
@@ -21,7 +21,7 @@ for folder in folders:
     if not os.path.exists(dst_path_val + folder):
         os.makedirs(dst_path_val + folder)
 
-src_path_test = "../Processed/"
+src_path_test = "../Processed/" #location of the Processed directory that was created in pre-processing
 dst_path_test = "../Test/"
 if not os.path.exists(dst_path_test):
     os.makedirs(dst_path_test)

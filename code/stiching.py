@@ -33,9 +33,13 @@ for subdirs, dirs, files in os.walk(vocals_directory):
         regex = re.compile(r'\d+')
         index = regex.findall(file)
         if not (index[0] in test_songs_list):
+        # if we want the original 50-50 divide instead, comment the line above and uncomment:
+        #if not (index[0] in test_songs_list) and int(index[0])<=50:
             test_songs_list.append(index[0])
 
-for test_songs in (test_songs_list):
+# for the 50-50 divide, uncomment this instead:
+#for test_songs in (test_songs_list[0:50]):
+for test_songs in (test_songs_list[-10:]):
     combined_vocals = np.array([])
     sr = None
     print('testing,..'+test_songs)
@@ -90,3 +94,4 @@ for test_songs in (test_songs_list):
         seg, sr = librosa.load(segment, sr=44100)
         combined_others = np.append(combined_others,seg)
     librosa.output.write_wav(sound_output_path, combined_others, sr)
+
