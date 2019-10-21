@@ -694,14 +694,15 @@ Tables 1 - 4 represent the results achieved by our experiments in which
  we tweaked the original network's parameters.
  The first experiment investigates our results for the same parameters as
  the original authors for us to have a baseline to build upon.
- All following experiments were changed to use a ratio of 80%/20% of training/te
-st tracks, respectively, due to the need of a larger dataset to train on
- and a lack of need for a large test set.
- The next 3 experiments investigated batch size changes, to see whether
- this could decrease sample noise.
+ Upon inspecting its first results, we noticed signs of overfitting.
+ As a result, all following experiments were changed to use a ratio of 80%/20%
+ of training/test tracks, respectively, due to the need for a larger dataset
+ to train on and a lack of need for a large test set.
+ The next 3 experiments investigated batch size changes, to test whether
+ a smaller batch size will yield less sample noise than a larger batch size.
  The 5th experiment investigated different network layer sizes in conjunction
- with maxpooling in order to decrease the amount of learned parameters.
- The 6th experiment investigated dropout to the fully connected fc0 layer
+ with maxpooling in order to decrease the total number of learned parameters.
+ The 6th experiment investigated dropout to the first fully connected layer
  in order to perform regularization and not be dependent of specific weights,
  and by that to, hopefully, prevent overfitting.
  The 7h and 8th experiments investigated different learning rate tweaks
@@ -724,6 +725,12 @@ st tracks, respectively, due to the need of a larger dataset to train on
  epochs did not yield any result improvement and caused overfitting.
  In practice, the experiments stopped (due to the early stopping criterion)
  before reaching the first milestone.
+ A small sample of our results as audio files can be found in the project
+ as well.
+ Lastly, an instructions text file is also provided to guide others who
+ would like to reproduce our experiments.
+ The instructions show which Python scripts should be run to prepare the
+ dataset, train the model and test it.
 \end_layout
 
 \begin_layout Standard
