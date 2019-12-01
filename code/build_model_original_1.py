@@ -1,15 +1,15 @@
-import torch
 import torch.nn as nn
 import torch.nn.functional as F
+
 
 class SepConvNet(nn.Module):
     def __init__(self, t1, f1, t2, f2, N1, N2, input_shape, NN=128):
         super(SepConvNet, self).__init__()
-        # (vconv): Conv2d(1, 50, kernel_size=(513, 1), stride=(1, 1))
-        self.vconv = nn.Conv2d(1, N1, kernel_size=(f1, t1), padding=0)
+        # (vconv): Conv2d(1, 50, kernel_size=(513/3, 1), stride=(1, 1))
+        self.vconv = nn.Conv2d(1, N1, kernel_size=(int(f1 / 3), t1), padding=0)
+        self.maxpool = nn.MaxPool2d((int(f1 / 3) * 2, 1), return_indices=True)
         # (hconv): Conv2d(50, 30, kernel_size=(1, 15), stride=(1, 1))
         self.hconv = nn.Conv2d(N1, N2, kernel_size=(f2, t2))
-        #self.drop = nn.Dropout()
 
         # (fc0): Linear(in_features=1140, out_features=128, bias=True)
         self.fc0 = nn.Linear(N2 * (input_shape[0] - f1 - f2 + 2) * (input_shape[1] - t1 - t2 + 2), NN)
@@ -25,13 +25,20 @@ class SepConvNet(nn.Module):
         self.hdeconv3 = nn.ConvTranspose2d(N2, N1, kernel_size=(f2, t2))
         self.hdeconv4 = nn.ConvTranspose2d(N2, N1, kernel_size=(f2, t2))
 
-        self.vdeconv1 = nn.ConvTranspose2d(N1, 1, kernel_size=(f1, t1))
-        self.vdeconv2 = nn.ConvTranspose2d(N1, 1, kernel_size=(f1, t1))
-        self.vdeconv3 = nn.ConvTranspose2d(N1, 1, kernel_size=(f1, t1))
-        self.vdeconv4 = nn.ConvTranspose2d(N1, 1, kernel_size=(f1, t1))
+        self.maxunpool1 = nn.MaxUnpool2d((int(f1 / 3) * 2, 1))
+        self.maxunpool2 = nn.MaxUnpool2d((int(f1 / 3) * 2, 1))
+        self.maxunpool3 = nn.MaxUnpool2d((int(f1 / 3) * 2, 1))
+        self.maxunpool4 = nn.MaxUnpool2d((int(f1 / 3) * 2, 1))
+
+        self.vdeconv1 = nn.ConvTranspose2d(N1, 1, kernel_size=(int(f1 / 3) + 1, t1))
+        self.vdeconv2 = nn.ConvTranspose2d(N1, 1, kernel_size=(int(f1 / 3) + 1, t1))
+        self.vdeconv3 = nn.ConvTranspose2d(N1, 1, kernel_size=(int(f1 / 3) + 1, t1))
+        self.vdeconv4 = nn.ConvTranspose2d(N1, 1, kernel_size=(int(f1 / 3) + 1, t1))
 
     def forward(self, x):
         x = self.vconv(x)
+        x, idx = self.maxpool(x)
+
         x = self.hconv(x)
 
         s1 = x.shape
@@ -39,7 +46,6 @@ class SepConvNet(nn.Module):
         x = x.view(s1[0], -1)
 
         x = F.relu(self.fc0(x))
-        #x = F.relu(self.drop(self.fc0(x)))
 
         x1 = F.relu(self.fc1(x))
         x2 = F.relu(self.fc2(x))
@@ -55,6 +61,11 @@ class SepConvNet(nn.Module):
         x2 = self.hdeconv2(x2)
         x3 = self.hdeconv3(x3)
         x4 = self.hdeconv4(x4)
+
+        x1 = self.maxunpool1(x1, idx)
+        x2 = self.maxunpool2(x2, idx)
+        x3 = self.maxunpool3(x3, idx)
+        x4 = self.maxunpool4(x4, idx)
 
         x1 = self.vdeconv1(x1)
         x2 = self.vdeconv2(x2)
